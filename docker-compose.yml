@@ -1,0 +1,31 @@
+version: "3.9"
+
+services:
+
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./models:/app/models     # mount so artifacts can be updated without rebuild
+      - ./data:/app/data
+    environment:
+      - ARTIFACTS_DIR=/app/models/artifacts
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  dashboard:
+    image: python:3.10-slim
+    working_dir: /app
+    command: >
+      sh -c "pip install -q streamlit pandas numpy xgboost joblib scipy &&
+             streamlit run dashboard/app.py --server.port 8501 --server.address 0.0.0.0"
+    ports:
+      - "8501:8501"
+    volumes:
+      - .:/app
+    depends_on:
+      - api
