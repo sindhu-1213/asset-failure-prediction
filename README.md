@@ -11,7 +11,7 @@
 > and **near-term failure risk** of industrial rotating equipment from multivariate sensor data.
 > Built to production standard — REST API, live dashboard, drift monitoring, CI/CD, Docker.
 
-**Author: Amreen**
+**Author: SINDHUJA S**
 
 ---
 
