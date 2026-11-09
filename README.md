@@ -1,6 +1,6 @@
 # Asset Failure Prediction MLOps
 
-![CI](https://github.com/Amreen-B/asset-failure-prediction-mlops/actions/workflows/ci.yml/badge.svg)
+
 ![Python](https://img.shields.io/badge/python-3.10%20|%203.11%20|%203.14-blue)
 ![XGBoost](https://img.shields.io/badge/XGBoost-2.0-orange)
 ![PyTorch](https://img.shields.io/badge/PyTorch-2.1-red)
@@ -136,7 +136,7 @@ asset-failure-prediction-mlops/
 
 ```bash
 # 1. Clone
-git clone https://github.com/Amreen-B/asset-failure-prediction-mlops
+git clone (https://github.com/sindhu-1213/asset-failure-prediction)
 cd asset-failure-prediction-mlops
 
 # 2. Install dependencies
