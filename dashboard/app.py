@@ -16,13 +16,14 @@ import json
 import os
 import sys
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, PROJECT_ROOT)
 
 from src.ingestion.load_data import load_train, load_test
 from src.features.build_features import build_features, get_feature_cols
 from src.monitoring.drift_check import DriftMonitor
 
-ARTIFACTS = "models/artifacts"
+ARTIFACTS = os.path.join(PROJECT_ROOT, "models", "artifacts")
 
 
 # ── cached loaders ────────────────────────────────────────────────────────────
@@ -31,18 +32,19 @@ ARTIFACTS = "models/artifacts"
 def load_models():
     from src.models.xgboost_model import XGBRULModel, XGBClassifier
 
-    rul_path = f"{ARTIFACTS}/xgb_rul.pkl"
-    clf_path = f"{ARTIFACTS}/xgb_clf.pkl"
+    rul_path = os.path.join(ARTIFACTS, "xgb_rul.pkl")
+    clf_path = os.path.join(ARTIFACTS, "xgb_clf.pkl")
 
-    xgb_rul = XGBRULModel.load(rul_path)   if os.path.exists(rul_path) else None
-    xgb_clf = XGBClassifier.load(clf_path) if os.path.exists(clf_path) else None
+    missing_paths = [path for path in (rul_path, clf_path) if not os.path.isfile(path)]
+    xgb_rul = XGBRULModel.load(rul_path) if os.path.isfile(rul_path) else None
+    xgb_clf = XGBClassifier.load(clf_path) if os.path.isfile(clf_path) else None
 
-    threshold_path = f"{ARTIFACTS}/best_threshold.json"
+    threshold_path = os.path.join(ARTIFACTS, "best_threshold.json")
     threshold = 0.5
     if os.path.exists(threshold_path):
         with open(threshold_path) as f:
             threshold = json.load(f).get("threshold", 0.5)
-    return xgb_rul, xgb_clf, threshold
+    return xgb_rul, xgb_clf, threshold, missing_paths
 
 
 @st.cache_data
@@ -80,11 +82,11 @@ st.markdown("---")
 
 # ── load ──────────────────────────────────────────────────────────────────────
 
-xgb_rul, xgb_clf, threshold = load_models()
-if xgb_rul is None or xgb_clf is None:
+xgb_rul, xgb_clf, threshold, missing_model_paths = load_models()
+if missing_model_paths:
     st.error(
-        "Model artifacts not found. "
-        "Run notebooks/04_advanced_modeling.ipynb first to train and save models."
+        "Required model artifact file(s) not found. Checked paths:\n"
+        + "\n".join(f"- {path}" for path in missing_model_paths)
     )
     st.stop()
 
@@ -195,7 +197,7 @@ else:
 st.markdown("---")
 st.subheader("📊 Data Drift Monitor")
 
-drift_path = f"{ARTIFACTS}/last_drift_report.json"
+drift_path = os.path.join(ARTIFACTS, "last_drift_report.json")
 if os.path.exists(drift_path):
     with open(drift_path) as f:
         drift = json.load(f)
